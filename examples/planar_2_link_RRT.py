@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import torch
 from einops._torch_specific import allow_ops_in_compiled_graph  # requires einops>=0.6.1
@@ -12,7 +13,8 @@ from torch_robotics.robots.robot_planar_link import RobotPlanar2Link
 from torch_robotics.tasks.tasks import PlanningTask
 from torch_robotics.torch_utils.seed import fix_random_seed
 from torch_robotics.torch_utils.torch_timer import TimerCUDA
-from torch_robotics.torch_utils.torch_utils import get_torch_device
+from torch_robotics.torch_utils.torch_utils import get_torch_device, to_numpy
+from torch_robotics.visualizers.configuration_free_space import plot_configuration_free_space
 from torch_robotics.visualizers.planning_visualizer import PlanningVisualizer
 
 allow_ops_in_compiled_graph()
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     planner = 'rrt-connect'
     # planner = 'rrt-star'
 
-    seed = 9
+    seed = 2
     fix_random_seed(seed)
 
     device = get_torch_device()
@@ -137,5 +139,13 @@ if __name__ == "__main__":
         n_frames=pos_trajs_iters.shape[1],
         anim_time=5
     )
+
+
+    # Plot the configuration free space
+    fig, ax = plot_configuration_free_space(env, robot, task)
+    # plot joint space path
+    pos_trajs_iters_np = pos_trajs_iters.cpu().numpy()[0]
+    ax.plot(pos_trajs_iters_np[:, 0], pos_trajs_iters_np[:, 1], color='orange', linewidth=4.0, alpha=1.0, zorder=10,
+            linestyle='-', marker='o')
 
     plt.show()

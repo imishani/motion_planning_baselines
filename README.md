@@ -15,7 +15,7 @@ pip install -e .
 ## Examples
 
 ```bash
-python examples/pointmass_dense_2d_CHOMP.py
+python examples/planar_2_link_CHOMP.py
 python examples/pointmass_dense_2d_GPMP.py
 python examples/pointmass_grid_circles_2d_Stoch-GPMP.py
 python examples/pointmass_grid_circles_2d_STOMP.py
