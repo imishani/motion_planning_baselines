@@ -72,7 +72,7 @@ results_planning['dt'] = 1./10.
 motion_planning_isaac_env = MotionPlanningIsaacGymEnv(
     env, robot, task,
     asset_root=get_robot_path().as_posix(),
-    robot_asset_file=robot.urdf_robot_file.replace(get_robot_path().as_posix() + '/', ''),
+    robot_asset_file=robot.robot_urdf_file.replace(get_robot_path().as_posix() + '/', ''),
     num_envs=trajs_pos.shape[1],
     all_robots_in_one_env=True,
 
