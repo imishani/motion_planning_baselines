@@ -140,10 +140,7 @@ if __name__ == "__main__":
     print(f'Optimization time ForLoop: {t.elapsed:.3f} sec')
 
     # -------------------------------- Visualize ---------------------------------
-    planner_visualizer = PlanningVisualizer(
-        task=task,
-        planner=planner
-    )
+
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
@@ -152,7 +149,7 @@ if __name__ == "__main__":
         if traj is None:
             continue
         traj_pos = robot.get_position(traj).unsqueeze(0)  # add batch dimension for interface
-        fig, ax = planner_visualizer.render_robot_trajectories(
+        fig, ax = task.render_robot_trajectories(
             fig=fig, ax=ax,
             trajs=traj_pos, start_state=start_state_pos, goal_state=goal_state_pos
         )

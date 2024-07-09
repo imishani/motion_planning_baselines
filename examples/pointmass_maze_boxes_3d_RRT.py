@@ -98,10 +98,7 @@ if __name__ == "__main__":
     print(f'Optimization time: {t.elapsed:.3f} sec')
 
     # -------------------------------- Visualize ---------------------------------
-    planner_visualizer = PlanningVisualizer(
-        task=task,
-        planner=planner
-    )
+
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
@@ -109,18 +106,18 @@ if __name__ == "__main__":
 
     pos_trajs_iters = robot.get_position(traj)
 
-    planner_visualizer.plot_joint_space_state_trajectories(
+    task.plot_joint_space_state_trajectories(
         trajs=traj,
         pos_start_state=start_state, pos_goal_state=goal_state,
         vel_start_state=torch.zeros_like(start_state), vel_goal_state=torch.zeros_like(goal_state),
     )
 
-    planner_visualizer.render_robot_trajectories(
+    task.render_robot_trajectories(
         trajs=pos_trajs_iters, start_state=start_state, goal_state=goal_state,
         render_planner=True,
     )
 
-    planner_visualizer.animate_robot_trajectories(
+    task.animate_robot_trajectories(
         trajs=pos_trajs_iters, start_state=start_state, goal_state=goal_state,
         plot_trajs=True,
         video_filepath=f'{base_file_name}-robot-traj.mp4',

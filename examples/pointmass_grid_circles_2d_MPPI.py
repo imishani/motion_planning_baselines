@@ -133,22 +133,19 @@ if __name__ == "__main__":
     trajs_iters = torch.cat((pos_iters, vel_iters), dim=-1)
 
     # -------------------------------- Visualize ---------------------------------
-    planner_visualizer = PlanningVisualizer(
-        task=task,
-        planner=planner
-    )
+
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
     pos_trajs_iters = robot.get_position(trajs_iters)
 
-    planner_visualizer.plot_joint_space_state_trajectories(
+    task.plot_joint_space_state_trajectories(
         trajs=trajs_iters[-1],
         pos_start_state=start_state, pos_goal_state=goal_state,
         vel_start_state=torch.zeros_like(start_state), vel_goal_state=torch.zeros_like(goal_state),
     )
 
-    planner_visualizer.animate_opt_iters_joint_space_state(
+    task.animate_opt_iters_joint_space_state(
         trajs=trajs_iters,
         pos_start_state=start_state, pos_goal_state=goal_state,
         vel_start_state=torch.zeros_like(start_state), vel_goal_state=torch.zeros_like(goal_state),
@@ -157,12 +154,12 @@ if __name__ == "__main__":
         anim_time=5
     )
 
-    planner_visualizer.render_robot_trajectories(
+    task.render_robot_trajectories(
         trajs=pos_trajs_iters[-1], start_state=start_state, goal_state=goal_state,
         render_planner=False,
     )
 
-    planner_visualizer.animate_robot_trajectories(
+    task.animate_robot_trajectories(
         trajs=pos_trajs_iters[-1], start_state=start_state, goal_state=goal_state,
         plot_trajs=True,
         video_filepath=f'{base_file_name}-robot-traj.mp4',
@@ -171,7 +168,7 @@ if __name__ == "__main__":
         anim_time=n_support_points*dt
     )
 
-    planner_visualizer.animate_opt_iters_robots(
+    task.animate_opt_iters_robots(
         trajs=pos_trajs_iters, start_state=start_state, goal_state=goal_state,
         video_filepath=f'{base_file_name}-traj-opt-iters.mp4',
         n_frames=max((2, opt_iters//10)),

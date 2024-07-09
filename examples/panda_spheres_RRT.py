@@ -13,7 +13,6 @@ from torch_robotics.tasks.tasks import PlanningTask
 from torch_robotics.torch_utils.seed import fix_random_seed
 from torch_robotics.torch_utils.torch_timer import TimerCUDA
 from torch_robotics.torch_utils.torch_utils import get_torch_device
-from torch_robotics.visualizers.planning_visualizer import PlanningVisualizer
 
 allow_ops_in_compiled_graph()
 
@@ -101,11 +100,6 @@ if __name__ == "__main__":
     print(f'Optimization time: {t.elapsed:.3f} sec')
 
     # -------------------------------- Visualize ---------------------------------
-    planner_visualizer = PlanningVisualizer(
-        task=task,
-        planner=planner
-    )
-
     base_file_name = Path(os.path.basename(__file__)).stem
 
     traj = traj.unsqueeze(0)  # batch dimension for interface
@@ -117,18 +111,18 @@ if __name__ == "__main__":
     print(f'percentage collision intensity {task.compute_collision_intensity_trajs(pos_trajs_iters) * 100:.2f}')
     print(f'success {task.compute_success_free_trajs(pos_trajs_iters)}')
 
-    planner_visualizer.plot_joint_space_state_trajectories(
+    task.plot_joint_space_state_trajectories(
         trajs=traj,
         pos_start_state=start_state, pos_goal_state=goal_state,
         vel_start_state=torch.zeros_like(start_state), vel_goal_state=torch.zeros_like(goal_state),
     )
 
-    planner_visualizer.render_robot_trajectories(
+    task.render_robot_trajectories(
         trajs=pos_trajs_iters, start_state=start_state, goal_state=goal_state,
         render_planner=False,
     )
 
-    planner_visualizer.animate_robot_trajectories(
+    task.animate_robot_trajectories(
         trajs=pos_trajs_iters, start_state=start_state, goal_state=goal_state,
         video_filepath=f'{base_file_name}-robot-traj.mp4',
         # n_frames=max((2, pos_trajs_iters[-1].shape[1]//10)),
