@@ -116,7 +116,7 @@ if __name__ == "__main__":
     print(f'success {task.compute_success_free_trajs(pos_trajs_iters)}')
 
     task.plot_joint_space_state_trajectories(
-        trajs=traj,
+        trajs_pos=traj,
         pos_start_state=start_state, pos_goal_state=goal_state,
         vel_start_state=torch.zeros_like(start_state), vel_goal_state=torch.zeros_like(goal_state),
     )

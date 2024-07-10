@@ -151,7 +151,7 @@ if __name__ == "__main__":
     pos_trajs_iters = robot.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
-        trajs=trajs_iters[-1],
+        trajs_pos=trajs_iters[-1],
         pos_start_state=start_state_pos, pos_goal_state=goal_state_pos,
         vel_start_state=torch.zeros_like(start_state_pos), vel_goal_state=torch.zeros_like(goal_state_pos),
     )
