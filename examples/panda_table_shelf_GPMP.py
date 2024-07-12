@@ -57,7 +57,7 @@ if __name__ == "__main__":
     print(start_state)
     print(goal_state)
 
-    # Construct planner
+    # Construct parametric_trajectory
     n_support_points = 64
     dt = 0.04
     num_particles_per_goal = 10
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],

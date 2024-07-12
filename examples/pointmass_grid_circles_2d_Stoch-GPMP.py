@@ -47,7 +47,7 @@ if __name__ == "__main__":
     start_state = torch.tensor([-0.8, -0.8], **tensor_args)
     goal_state = torch.tensor([0.8, 0.8], **tensor_args)
 
-    # Construct planner
+    # Construct parametric_trajectory
     n_support_points = 64
     dt = 0.04
     num_particles_per_goal = 10
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],

@@ -57,8 +57,7 @@ task = PlanningTask(
 
 # -------------------------------- Physics ---------------------------------
 trajs_iters = results_planning['trajs_iters_free']
-trajs_pos = robot.get_position(trajs_iters[-1]).movedim(1, 0)
-trajs_vel = robot.get_velocity(trajs_iters[-1]).movedim(1, 0)
+trajs_pos = task.get_position(trajs_iters[-1]).movedim(1, 0)
 
 # POSITION CONTROL
 # add initial positions for better visualization

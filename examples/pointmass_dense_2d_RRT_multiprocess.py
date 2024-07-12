@@ -27,7 +27,7 @@ allow_ops_in_compiled_graph()
 
 if __name__ == "__main__":
     planner = 'rrt-connect'
-    # planner = 'rrt-star'
+    # parametric_trajectory = 'rrt-star'
 
     seed = 0
     fix_random_seed(seed)
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     for traj in trajs_l:
         if traj is None:
             continue
-        traj_pos = robot.get_position(traj).unsqueeze(0)  # add batch dimension for interface
+        traj_pos = task.get_position(traj).unsqueeze(0)  # add batch dimension for interface
         fig, ax = task.render_robot_trajectories(
             fig=fig, ax=ax,
             trajs=traj_pos, start_state=start_state_pos, goal_state=goal_state_pos

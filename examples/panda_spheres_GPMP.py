@@ -77,7 +77,7 @@ if __name__ == "__main__":
     print(goal_state)
 
 
-    # Construct planner
+    # Construct parametric_trajectory
     duration = 5  # sec
     n_support_points = 128
     dt = duration / n_support_points
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     print(f'percentage collision intensity {task.compute_collision_intensity_trajs(trajs_iters[-1])*100:.2f}')
     print(f'success {task.compute_success_free_trajs(trajs_iters[-1])}')
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],

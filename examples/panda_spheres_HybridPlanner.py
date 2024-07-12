@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     n_trajectories = 5
 
-    ############### Sample-based planner
+    ############### Sample-based parametric_trajectory
     rrt_connect_default_params_env = env.get_rrt_connect_params()
 
     rrt_connect_params = dict(
@@ -98,12 +98,12 @@ if __name__ == "__main__":
         optimize_sequentially=True
     )
 
-    ############### Optimization-based planner
+    ############### Optimization-based parametric_trajectory
     n_support_points = 64
     dt = 0.04
     gpmp_default_params_env = env.get_gpmp2_params()
 
-    # Construct planner
+    # Construct parametric_trajectory
     planner_params = dict(
         **gpmp_default_params_env,
         robot=robot,
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     )
     opt_based_planner = GPMP2(**planner_params)
 
-    ############### Hybrid planner
+    ############### Hybrid parametric_trajectory
     opt_iters = planner_params['opt_iters']
     planner = HybridPlanner(
         sample_based_planner,
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     print(f'percentage collision intensity {task.compute_collision_intensity_trajs(trajs_iters[-1])*100:.2f}')
     print(f'success {task.compute_success_free_trajs(trajs_iters[-1])}')
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],

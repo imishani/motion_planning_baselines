@@ -23,7 +23,7 @@ allow_ops_in_compiled_graph()
 
 if __name__ == "__main__":
     planner = 'rrt-connect'
-    # planner = 'rrt-star'
+    # parametric_trajectory = 'rrt-star'
 
     seed = 0
     fix_random_seed(seed)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     traj = traj.unsqueeze(0)  # batch dimension for interface
 
-    pos_trajs_iters = robot.get_position(traj)
+    pos_trajs_iters = task.get_position(traj)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=traj,

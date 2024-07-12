@@ -80,7 +80,7 @@ if __name__ == "__main__":
     print(start_state)
     print(goal_state)
 
-    # Construct planner
+    # Construct parametric_trajectory
     num_particles_per_goal = 5
 
     default_params_env = env.get_gpmp2_params(robot=robot)
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     base_file_name = Path(os.path.basename(__file__)).stem
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],

@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # -------------------------------- Visualize ---------------------------------
     base_file_name = Path(os.path.basename(__file__)).stem
 
-    pos_trajs_iters = robot.get_position(trajs_iters)
+    pos_trajs_iters = task.get_position(trajs_iters)
 
     task.plot_joint_space_state_trajectories(
         trajs_pos=trajs_iters[-1],
