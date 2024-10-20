@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import time
 import matplotlib.pyplot as plt
+from einops import einops
+
 from mp_baselines.planners.base import MPPlanner
 from mp_baselines.planners.rrt_base import RRTBase
 from mp_baselines.planners.utils import safe_path, purge_duplicates_from_traj, extend_path
@@ -203,3 +205,70 @@ class RRTConnect(RRTBase):
             node.render(ax)
         for node in self.nodes_tree_2:
             node.render(ax)
+
+
+class ConstraintRRTConnect(RRTConnect):
+
+    def __init__(self,
+                 task=None,
+                 n_iters: int = None,
+                 start_state_pos: torch.Tensor = None,
+                 step_size: float = 0.1,
+                 n_radius: float = 1.,
+                 max_time: float = 60.,
+                 goal_state_pos: torch.Tensor = None,
+                 tensor_args: dict = None,
+                 n_pre_samples=10000,
+                 pre_samples=None,
+                 ee_position_constraint=None,
+                 ee_orientation_constraint=None,
+                 **kwargs):
+        """
+        ee_position_constraint: dict with keys 'axis' and values 'value'
+        ee_orientation_constraint:
+        """
+        super().__init__(
+            task=task,
+            n_iters=n_iters,
+            start_state_pos=start_state_pos,
+            step_size=step_size,
+            n_radius=n_radius,
+            max_time=max_time,
+            goal_state_pos=goal_state_pos,
+            tensor_args=tensor_args,
+            n_pre_samples=n_pre_samples,
+            pre_samples=pre_samples,
+            **kwargs
+        )
+        assert self.task.robot.name == 'RobotPanda'
+        self.ee_position_constraint = ee_position_constraint
+        self.ee_orientation_constraint = ee_orientation_constraint
+        self.positions_map = {
+            'x': 0,
+            'y': 1,
+            'z': 2,
+        }
+
+    def sample_fn(self, without_collision=True, **observation):
+        while True:
+            if without_collision:
+                conf_sample = self.random_collision_free(**observation)
+            else:
+                conf_sample = self.task.random_q()
+            if self.ee_position_constraint is not None:
+                fk = self.task.robot.get_EE_pose(conf_sample)
+                for axis, value in self.ee_position_constraint.items():
+                    fk[:, :, self.positions_map[axis], -1] = value
+
+                conf_sample, valid = self.task.robot.diff_panda.inverse_kinematics(fk.squeeze(axis=0),
+                                                                                   link_name='ee_link',
+                                                                                   q0=conf_sample.unsqueeze(0).repeat(10, 1),
+                                                                                   max_iters=500, lr=2e-1, se3_eps=5e-2,
+                                                                                   batch_size=10,
+                                                                                   eps_joint_lim=torch.pi/64)
+                conf_sample = conf_sample[valid] if len(valid) > 0 else None
+                # check if the new configuration is collision free
+                if conf_sample is None: # or self.collision_fn(conf_sample).squeeze():
+                    continue
+                else:
+                    return conf_sample[torch.randint(0, len(conf_sample), (1,))].squeeze()

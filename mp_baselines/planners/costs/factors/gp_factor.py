@@ -15,7 +15,7 @@ class GPFactor:
         self.dim = dim
         self.d_t = d_t
         self.tensor_args = tensor_args
-        self.state_dim = self.dim * 2  # position and velocity
+        self.state_dim = self.dim #* 2  # position and velocity
         self.num_factors = num_factors
         self.idx1 = torch.arange(0, self.num_factors, device=tensor_args['device'])
         self.idx2 = torch.arange(1, self.num_factors+1, device=tensor_args['device'])

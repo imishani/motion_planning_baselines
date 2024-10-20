@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import torch
 from einops._torch_specific import allow_ops_in_compiled_graph  # requires einops>=0.6.1
 
-from mp_baselines.planners.rrt_connect import RRTConnect
+from mp_baselines.planners.rrt_connect import RRTConnect, ConstraintRRTConnect
 from mp_baselines.planners.rrt_star import RRTStar, InfRRTStar
-from torch_robotics.environments.env_spheres_3d import EnvSpheres3D
+from torch_robotics.environments.env_spheres_3d import EnvSpheres3D, EnvEmpty
 from torch_robotics.robots.robot_panda import RobotPanda
 from torch_robotics.tasks.tasks import PlanningTask
 from torch_robotics.torch_utils.seed import fix_random_seed
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     tensor_args = {'device': device, 'dtype': torch.float32}
 
     # ---------------------------- Environment, Robot, PlanningTask ---------------------------------
-    env = EnvSpheres3D(
+    env = EnvEmpty(
         precompute_sdf_obj_fixed=True,
         sdf_cell_size=0.01,
         tensor_args=tensor_args)
@@ -64,7 +64,13 @@ if __name__ == "__main__":
             goal_state_pos=goal_state,
             tensor_args=tensor_args,
         )
-        planner = RRTConnect(**rrt_connect_params)
+        # planner = RRTConnect(**rrt_connect_params)
+        z = robot.get_EE_position(start_state).squeeze()[2]
+        constraint = {'z': z}
+        planner = ConstraintRRTConnect(**rrt_connect_params,
+                                       ee_position_constraint=constraint)
+        q_free = planner.sample_fn()
+        goal_state = q_free
     elif planner == 'rrt-star':
         n_iters = 30000
         step_size = torch.pi / 80

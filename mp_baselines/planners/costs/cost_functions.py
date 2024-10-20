@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 
 import einops
@@ -49,19 +48,20 @@ class Cost(ABC):
 
         q_pos = self.robot.get_position(trajs)
         q_vel = self.robot.get_velocity(trajs)
-        H_positions = self.robot.fk_map_collision(q_pos)  # I, taskspaces, x_dim+1, x_dim+1 (homogeneous transformation matrices)
+        H_positions = self.robot.fk_map_collision(
+            q_pos)  # I, taskspaces, x_dim+1, x_dim+1 (homogeneous transformation matrices)
         return trajs, q_pos, q_vel, H_positions
 
 
 class CostComposite(Cost):
 
     def __init__(
-        self,
-        robot,
-        n_support_points,
-        cost_list,
-        weights_cost_l=None,
-        **kwargs
+            self,
+            robot,
+            n_support_points,
+            cost_list,
+            weights_cost_l=None,
+            **kwargs
     ):
         super().__init__(robot, n_support_points, **kwargs)
         self.cost_l = cost_list
@@ -124,7 +124,8 @@ class CostComposite(Cost):
         for cost, weight_cost in zip(self.cost_l, self.weight_cost_l):
             A, b, K = cost.get_linear_system(
                 trajs, q_pos=q_pos, q_vel=q_vel, H_positions=H_positions,
-                trajs_interp=trajs_interp, q_pos_interp=q_pos_interp, q_vel_interp=q_vel_interp, H_positions_interp=H_positions_interp,
+                trajs_interp=trajs_interp, q_pos_interp=q_pos_interp, q_vel_interp=q_vel_interp,
+                H_positions_interp=H_positions_interp,
                 **kwargs)
             if A is None or b is None or K is None:
                 continue
@@ -139,7 +140,7 @@ class CostComposite(Cost):
         offset = 0
         for i in range(len(Ks)):
             dim = Ks[i].shape[1]
-            K[:, offset:offset+dim, offset:offset+dim] = Ks[i]
+            K[:, offset:offset + dim, offset:offset + dim] = Ks[i]
             offset += dim
         return A, b, K
 
@@ -218,7 +219,9 @@ class CostCollision(Cost):
             A[:, :, :H_obst.shape[-1]] = H_obst
             # shift each row by self.dim
             idxs = torch.arange(A.shape[-1], **self.tensor_args).repeat(A.shape[-2], 1)
-            idxs = (idxs - torch.arange(self.dim, (idxs.shape[0] + 1) * self.dim, self.dim, **self.tensor_args).view(-1, 1)) % idxs.shape[-1]
+            idxs = (idxs - torch.arange(self.dim, (idxs.shape[0] + 1) * self.dim, self.dim, **self.tensor_args).view(-1,
+                                                                                                                     1)) % \
+                   idxs.shape[-1]
             idxs = idxs.to(torch.int64)
             A = torch.gather(A, -1, idxs.repeat(batch_size, 1, 1))
 
@@ -234,13 +237,13 @@ class CostCollision(Cost):
 class CostGP(Cost):
 
     def __init__(
-        self,
-        robot,
-        n_support_points,
-        start_state,
-        dt,
-        sigma_params,
-        **kwargs
+            self,
+            robot,
+            n_support_points,
+            start_state,
+            dt,
+            sigma_params,
+            **kwargs
     ):
         super().__init__(robot, n_support_points, **kwargs)
         self.start_state = start_state
@@ -287,12 +290,14 @@ class CostGP(Cost):
         costs = start_costs + gp_costs
 
         return costs
-    
+
     def get_linear_system(self, trajs, **observation):
         batch_size = trajs.shape[0]
-        A = torch.zeros(batch_size, self.dim * self.n_support_points, self.dim * self.n_support_points, **self.tensor_args)
+        A = torch.zeros(batch_size, self.dim * self.n_support_points, self.dim * self.n_support_points,
+                        **self.tensor_args)
         b = torch.zeros(batch_size, self.dim * self.n_support_points, 1, **self.tensor_args)
-        K = torch.zeros(batch_size, self.dim * self.n_support_points, self.dim * self.n_support_points, **self.tensor_args)
+        K = torch.zeros(batch_size, self.dim * self.n_support_points, self.dim * self.n_support_points,
+                        **self.tensor_args)
 
         # Start prior factor
         err_p, H_p = self.start_prior.get_error(trajs[:, [0]])
@@ -411,13 +416,15 @@ class CostJointLimits(Cost):
 
         idxs_lower = torch.argwhere(trajs_pos < self.robot.q_min + self.eps)
         cost_lower = torch.pow(
-            self.robot.q_min[idxs_lower[:, 2]] + self.eps - trajs_pos[idxs_lower[:, 0], idxs_lower[:, 1], idxs_lower[:, 2]],
+            self.robot.q_min[idxs_lower[:, 2]] + self.eps - trajs_pos[
+                idxs_lower[:, 0], idxs_lower[:, 1], idxs_lower[:, 2]],
             2
         ).sum(-1)
 
         idxs_upper = torch.argwhere(trajs_pos > self.robot.q_max - self.eps)
         cost_upper = torch.pow(
-            self.robot.q_max[idxs_upper[:, 2]] - self.eps - trajs_pos[idxs_upper[:, 0], idxs_upper[:, 1], idxs_upper[:, 2]],
+            self.robot.q_max[idxs_upper[:, 2]] - self.eps - trajs_pos[
+                idxs_upper[:, 0], idxs_upper[:, 1], idxs_upper[:, 2]],
             2
         ).sum(-1)
 
@@ -432,12 +439,12 @@ class CostJointLimits(Cost):
 class CostGoal(Cost):
 
     def __init__(
-        self,
-        robot,
-        n_support_points,
-        field=None,
-        sigma_goal=None,
-        **kwargs
+            self,
+            robot,
+            n_support_points,
+            field=None,
+            sigma_goal=None,
+            **kwargs
     ):
         super().__init__(robot, n_support_points, **kwargs)
         self.field = field
@@ -450,7 +457,7 @@ class CostGoal(Cost):
         self.goal_factor = FieldFactor(
             self.n_dof,
             self.sigma_goal,
-            [-1, None]   # only take last point
+            [-1, None]  # only take last point
         )
 
     def eval(self, trajs, x_trajs=None, **observation):
@@ -488,14 +495,14 @@ class CostGoal(Cost):
 class CostGoalPrior(Cost):
 
     def __init__(
-        self,
-        robot,
-        n_support_points,
-        multi_goal_states=None,  # num_goal x n_dim (pos + vel)
-        num_particles_per_goal=None,
-        num_samples=None,
-        sigma_goal_prior=None,
-        **kwargs
+            self,
+            robot,
+            n_support_points,
+            multi_goal_states=None,  # num_goal x n_dim (pos + vel)
+            num_particles_per_goal=None,
+            num_samples=None,
+            sigma_goal_prior=None,
+            **kwargs
     ):
         super().__init__(robot, n_support_points, **kwargs)
         self.multi_goal_states = multi_goal_states
@@ -523,7 +530,8 @@ class CostGoalPrior(Cost):
     def eval(self, trajs, **observation):
         costs = 0
         if self.multi_goal_states is not None:
-            x = trajs.reshape(self.num_goals, self.num_particles_per_goal * self.num_samples, self.n_support_points, self.dim)
+            x = trajs.reshape(self.num_goals, self.num_particles_per_goal * self.num_samples, self.n_support_points,
+                              self.dim)
             costs = torch.zeros(self.num_goals, self.num_particles_per_goal * self.num_samples, **self.tensor_args)
             # TODO: remove this for loop
             for i in range(self.num_goals):
@@ -547,8 +555,89 @@ class CostGoalPrior(Cost):
             # TODO: remove this for loop
             for i in range(self.num_goals):
                 err_g, H_g = self.multi_goal_prior[i].get_error(x[i, :, [-1]])
-                A[i*npg: (i+1)*npg, :, -self.dim:] = H_g
-                b[i*npg: (i+1)*npg] = err_g
-                K[i*npg: (i+1)*npg] = self.multi_goal_prior[i].K
+                A[i * npg: (i + 1) * npg, :, -self.dim:] = H_g
+                b[i * npg: (i + 1) * npg] = err_g
+                K[i * npg: (i + 1) * npg] = self.multi_goal_prior[i].K
 
         return A, b, K
+
+
+class CostCorridor2D(Cost):
+
+    def __init__(self,
+                 robot,
+                 n_support_points,
+                 corridor: np.ndarray = None,
+                 point_idx: int = -1,
+                 **kwargs):
+        super().__init__(robot, n_support_points, **kwargs)
+        self.corridor = corridor
+        self.point_idx = point_idx
+
+    def eval(self, trajs, **observation):
+        if self.corridor is None:
+            return 0
+
+        point_position = trajs[:, self.point_idx, :2]
+        point_position = self.robot.get_position(point_position)
+        corridor = torch.tensor(self.corridor.T, device=point_position.device, dtype=point_position.dtype)
+        corridor = self.robot.get_position(corridor)
+        corridor = corridor.unsqueeze(0).repeat(point_position.shape[0], 1, 1)
+        diff = torch.abs(point_position.unsqueeze(1) - corridor)
+        x_corridor_range = torch.abs(corridor[:, 1, 0] - corridor[:, 0, 0])
+        y_corridor_range = torch.abs(corridor[:, 1, 1] - corridor[:, 0, 1])
+        corridor_range = torch.stack((x_corridor_range, y_corridor_range), dim=-1)
+        cost = torch.max(diff - corridor_range.unsqueeze(1), torch.zeros_like(diff)).sum(-1)
+        cost = torch.pow(cost, 2).sum(-1)
+        # cost = torch.pow(cost, 0.5)
+        return cost
+
+    def get_linear_system(self, trajs, **observation):
+        pass
+
+
+class CostConstraintSE3Manifold(Cost):
+
+    def __init__(self,
+                 robot,
+                 n_support_points,
+                 position_constraint: dict = None,
+                 orientation_constraint: dict = None,
+                 **kwargs):
+        assert robot.name == 'RobotPanda'
+        super().__init__(robot, n_support_points, **kwargs)
+        self.position_constraint = position_constraint
+        self.orientation_constraint = orientation_constraint
+        self.position_map = {
+            'x': 0,
+            'y': 1,
+            'z': 2
+        }
+        self.orientation_map = {
+            'rot_x': 0,
+            'rot_y': 1,
+            'rot_z': 2
+        }
+
+    def eval(self, trajs, **observation):
+        if self.position_constraint is None and self.orientation_constraint is None:
+            return 0
+
+        q_pose = self.robot.diff_panda.compute_forward_kinematics(trajs,
+                                                                  link_name='ee_link',
+                                                                  state_less=True)
+        q_pose = q_pose.squeeze()
+        cost = 0
+        if self.position_constraint is not None:
+            for axis, pos in self.position_constraint.items():
+                idx = self.position_map[axis]
+                cost += torch.pow(q_pose[:, idx, -1] - pos, 2)
+        if self.orientation_constraint is not None:
+            for axis, rot in self.orientation_constraint.items():
+                idx = self.orientation_map[axis]
+                cost += 1 - torch.sum(torch.pow(q_pose[:, :2, idx] * rot, 2), dim=-1)
+        return cost
+
+    def get_linear_system(self, trajs, **observation):
+        pass # TODO
+
